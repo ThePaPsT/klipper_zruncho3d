@@ -1,5 +1,6 @@
-# Code for handling the kinematics of corexy robots
+# Code for handling the kinematics of dualgantry corexy robots
 #
+# Copyright (C) 2025 Thepapst <le70@gmx.de>
 # Copyright (C) 2022 Zruncho3D <zruncho3d@gmail.com>
 # Copyright (C) 2022 Fabrice Gallet <tircown@gmail.com>
 #
@@ -28,14 +29,13 @@ class DualGantryCoreXYKinematics:
         self.rails[4].setup_itersolve('corexy_stepper_alloc', b'-')
         for s in self.get_steppers():
             s.set_trapq(toolhead.get_trapq())
-            toolhead.register_step_generator(s.generate_steps)
         self.rails[3].set_trapq(None)
         self.rails[4].set_trapq(None)
         self.dualgantry_rails = ( (self.rails[0], self.rails[1]),
                                   (self.rails[3], self.rails[4]) )
         ranges = [r.get_range() for r in self.rails]
-        self.axes_min = toolhead.Coord(*[r[0] for r in ranges[:3]], e=0.)
-        self.axes_max = toolhead.Coord(*[r[1] for r in ranges[:3]], e=0.)
+        self.axes_min = toolhead.Coord([r[0] for r in ranges[:3]])
+        self.axes_max = toolhead.Coord([r[1] for r in ranges[:3]])
         # Setup boundary checks
         max_velocity, max_accel = toolhead.get_max_velocity()
         self.max_z_velocity = config.getfloat(
@@ -138,10 +138,10 @@ class DualGantryCoreXYKinematics:
             # Activate carriage rails
             rails = self.dualgantry_rails[carriage]
             ranges = [r.get_range() for r in rails]
-            self.axes_min = toolhead.Coord(ranges[0][0], ranges[1][0],
-                                           self.axes_min[2], self.axes_min[3])
-            self.axes_max = toolhead.Coord(ranges[0][1], ranges[1][1],
-                                           self.axes_max[2], self.axes_max[3])
+            self.axes_min = toolhead.Coord((ranges[0][0], ranges[1][0],
+                                           self.axes_min[2], self.axes_min[3]))
+            self.axes_max = toolhead.Coord((ranges[0][1], ranges[1][1],
+                                           self.axes_max[2], self.axes_max[3]))
             for i, r in enumerate(rails):
                 r.set_trapq(toolhead.get_trapq())
                 self.rails[i] = r
